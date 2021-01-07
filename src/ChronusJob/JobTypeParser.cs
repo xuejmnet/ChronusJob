@@ -31,7 +31,6 @@ namespace ChronusJob
                 var jobRun = method.GetCustomAttribute<JobRunAttribute>();
                 if ( jobRun!= null)
                 {
-                    var now = DateTime.UtcNow;
                     var jobEntry = new JobEntry()
                     {
                         BeginUtcTime = jobRun.BeginUtcTime,

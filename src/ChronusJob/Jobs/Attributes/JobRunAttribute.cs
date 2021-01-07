@@ -8,6 +8,7 @@ namespace ChronusJob.Jobs.Attributes
 * @Date: Wednesday, 06 January 2021 13:04:57
 * @Email: 326308290@qq.com
 */
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public class JobRunAttribute:Attribute
     {
         /// <summary>

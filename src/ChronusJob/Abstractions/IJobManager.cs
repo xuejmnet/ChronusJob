@@ -16,5 +16,6 @@ namespace ChronusJob.Abstractions
         void AddJob(JobEntry  jobEntry);
 
         List<JobEntry> GetNowRunJobs();
+        DateTime? GetNextJobUtcTime();
     }
 }

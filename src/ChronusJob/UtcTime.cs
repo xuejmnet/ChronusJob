@@ -16,5 +16,10 @@ namespace ChronusJob
         {
             return (DateTime.UtcNow.Ticks - UtcStartTicks) / 10000;
         }
+
+        public static long InputUtcTimeMillis(DateTime utcTime)
+        {
+            return (utcTime.Ticks - UtcStartTicks) / 10000;
+        }
     }
 }
