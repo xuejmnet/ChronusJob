@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Reflection;
+using ChronusJob.Jobs;
 
 namespace ChronusJob.Abstractions
 {
@@ -11,6 +13,8 @@ namespace ChronusJob.Abstractions
 */
     public interface IJobManager
     {
-        void AddJobType(TypeInfo jobTypeInfo);
+        void AddJob(JobEntry  jobEntry);
+
+        List<JobEntry> GetNowRunJobs();
     }
 }

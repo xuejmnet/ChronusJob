@@ -1,8 +1,15 @@
 using System;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using ChronusJob.Abstractions;
+using ChronusJob.Cron;
 using ChronusJob.Extensions;
 using ChronusJob.Helpers;
+using ChronusJob.Jobs;
+using ChronusJob.Jobs.Attributes;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace ChronusJob
 {
@@ -16,14 +23,19 @@ namespace ChronusJob
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly IJobManager _jobManager;
+        private readonly ILogger<JobRunnerService> _logger;
+        private readonly CancellationTokenSource _cts = new CancellationTokenSource();
+        private const long DEFAULT_MILLIS = 1000L;
 
-        public JobRunnerService(IServiceProvider serviceProvider,IJobManager jobManager)
+        public JobRunnerService(IServiceProvider serviceProvider,IJobManager jobManager,ILogger<JobRunnerService> logger)
         {
             _serviceProvider = serviceProvider;
             _jobManager = jobManager;
+            _logger = logger;
+            Init();
         }
 
-        public void Init()
+        private void Init()
         {
             var assemblies = AssemblyHelper.CurrentDomain.GetAssemblies();
             foreach (var x in assemblies)
@@ -32,10 +44,107 @@ namespace ChronusJob
                 var types = x.DefinedTypes.Where(y => y.IsJobType()).ToList();
                 foreach (var y in types)
                 {
-                    _jobManager.AddJobType(y);
+                    var jobs=JobTypeParser.Parse(y.AsType());
+                    foreach (var job in jobs)
+                    {
+                        _jobManager.AddJob(job);
+                    }
                 }
             }
-            
+        }
+
+        public Task StartAsync()
+        {
+            while (!_cts.Token.IsCancellationRequested)
+            {
+                var delayMs = 1000L;
+                try
+                {
+                    var beginTime = UtcTime.CurrentTimeMillis();
+                    LoopWork();
+                    var costTime = UtcTime.CurrentTimeMillis() - beginTime;
+                    if (DEFAULT_MILLIS < costTime)
+                    {
+                        delayMs = 0;
+                    }
+                    else
+                    {
+                        delayMs = DEFAULT_MILLIS - costTime;
+                    }
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError($"job runner service exception : {e}");
+                    Task.Delay((int)DEFAULT_MILLIS, _cts.Token);
+                }
+                Task.Delay((int)delayMs, _cts.Token);
+            }
+
+            return Task.CompletedTask;
+        }
+
+        public Task StopAsync()
+        {
+            _cts.Cancel();
+            return Task.CompletedTask;
+        }
+
+        private void LoopWork()
+        {
+            var runJobs = _jobManager.GetNowRunJobs();
+            if(!runJobs.Any())
+                return;
+            foreach (var job in runJobs)
+            {
+                DoJob(job);
+            }
+        }
+
+        private void DoJob(JobEntry jobEntry)
+        {
+            Task.Factory.StartNew(() =>
+            {
+                using (var scope=_serviceProvider.CreateScope())
+                {
+                    var args = jobEntry.JobClass.GetConstructors()
+                        .First()
+                        .GetParameters()
+                        .Select(x =>
+                        {
+                            if (x.ParameterType == typeof(IServiceProvider))
+                                return scope.ServiceProvider;
+                            else
+                                return scope.ServiceProvider.GetService(x.ParameterType);
+                        })
+                        .ToArray();
+                    var job = Activator.CreateInstance(jobEntry.JobClass, args);
+                    var method = jobEntry.JobMethod;
+                    var @params = method.GetParameters().Select(x => scope.ServiceProvider.GetService(x.ParameterType)).ToArray();
+                    try
+                    {
+                        _logger.LogInformation($"job  [{jobEntry.JobName}] will start");
+                        if (jobEntry.StartRun())
+                        {
+                            _logger.LogInformation($"job  [{jobEntry.JobName}]  start success");
+                            method.Invoke(job, @params);
+                            _logger.LogInformation($"job  [{jobEntry.JobName}]  invoke complete");
+                            jobEntry.NextUtcTime= new CronExpression(jobEntry.Cron).GetTimeAfter(DateTime.UtcNow);
+                        }
+                        else
+                        {
+                            _logger.LogInformation($"job  [{jobEntry.JobName}]  start false");
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.LogError($"job [{jobEntry.JobName}]  invoke fail : {e}");
+                    }
+                    finally
+                    {
+                        jobEntry.CompleteRun();
+                    }
+                }
+            });
         }
     }
 }
