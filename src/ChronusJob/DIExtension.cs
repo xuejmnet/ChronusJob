@@ -11,13 +11,13 @@ namespace ChronusJob
 * @Date: Thursday, 07 January 2021 13:34:52
 * @Email: 326308290@qq.com
 */
-    public class DIExtension
+    public static class DIExtension
     {
-        public IServiceCollection AddChronusJob(IServiceCollection services)
+        public static IServiceCollection AddChronusJob(this IServiceCollection services)
         {
             services.AddSingleton<IJobManager, InMemoryJobManager>()
                 .AddSingleton<JobRunnerService>()
-                .AddSingleton<ChronusJobBootstrapper>();
+                .AddHostedService<ChronusJobBootstrapper>();
             return services;
         }
     }

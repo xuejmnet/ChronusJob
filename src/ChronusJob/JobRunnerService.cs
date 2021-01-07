@@ -27,7 +27,7 @@ namespace ChronusJob
         private readonly CancellationTokenSource _cts = new CancellationTokenSource();
         private const long DEFAULT_MILLIS = 1000L;
 
-        public JobRunnerService(IServiceProvider serviceProvider,IJobManager jobManager,ILogger<JobRunnerService> logger)
+        public JobRunnerService(IServiceProvider serviceProvider, IJobManager jobManager, ILogger<JobRunnerService> logger)
         {
             _serviceProvider = serviceProvider;
             _jobManager = jobManager;
@@ -44,7 +44,7 @@ namespace ChronusJob
                 var types = x.DefinedTypes.Where(y => y.IsJobType()).ToList();
                 foreach (var y in types)
                 {
-                    var jobs=JobTypeParser.Parse(y.AsType());
+                    var jobs = JobTypeParser.Parse(y.AsType());
                     foreach (var job in jobs)
                     {
                         _jobManager.AddJob(job);
@@ -53,7 +53,7 @@ namespace ChronusJob
             }
         }
 
-        public Task StartAsync()
+        public async Task StartAsync()
         {
             while (!_cts.Token.IsCancellationRequested)
             {
@@ -75,12 +75,11 @@ namespace ChronusJob
                 catch (Exception e)
                 {
                     _logger.LogError($"job runner service exception : {e}");
-                    Task.Delay((int)DEFAULT_MILLIS, _cts.Token);
+                    await Task.Delay((int) DEFAULT_MILLIS, _cts.Token);
                 }
-                Task.Delay((int)delayMs, _cts.Token);
-            }
 
-            return Task.CompletedTask;
+                await Task.Delay((int) delayMs, _cts.Token);
+            }
         }
 
         public Task StopAsync()
@@ -92,7 +91,7 @@ namespace ChronusJob
         private void LoopWork()
         {
             var runJobs = _jobManager.GetNowRunJobs();
-            if(!runJobs.Any())
+            if (!runJobs.Any())
                 return;
             foreach (var job in runJobs)
             {
@@ -102,37 +101,33 @@ namespace ChronusJob
 
         private void DoJob(JobEntry jobEntry)
         {
-            Task.Factory.StartNew(() =>
+            if (jobEntry.StartRun())
             {
-                using (var scope=_serviceProvider.CreateScope())
+                Task.Factory.StartNew(() =>
                 {
-                    var args = jobEntry.JobClass.GetConstructors()
-                        .First()
-                        .GetParameters()
-                        .Select(x =>
-                        {
-                            if (x.ParameterType == typeof(IServiceProvider))
-                                return scope.ServiceProvider;
-                            else
-                                return scope.ServiceProvider.GetService(x.ParameterType);
-                        })
-                        .ToArray();
-                    var job = Activator.CreateInstance(jobEntry.JobClass, args);
-                    var method = jobEntry.JobMethod;
-                    var @params = method.GetParameters().Select(x => scope.ServiceProvider.GetService(x.ParameterType)).ToArray();
                     try
                     {
-                        _logger.LogInformation($"job  [{jobEntry.JobName}] will start");
-                        if (jobEntry.StartRun())
+                        using (var scope = _serviceProvider.CreateScope())
                         {
+                            var args = jobEntry.JobClass.GetConstructors()
+                                .First()
+                                .GetParameters()
+                                .Select(x =>
+                                {
+                                    if (x.ParameterType == typeof(IServiceProvider))
+                                        return scope.ServiceProvider;
+                                    else
+                                        return scope.ServiceProvider.GetService(x.ParameterType);
+                                })
+                                .ToArray();
+                            var job = Activator.CreateInstance(jobEntry.JobClass, args);
+                            var method = jobEntry.JobMethod;
+                            var @params = method.GetParameters().Select(x => scope.ServiceProvider.GetService(x.ParameterType)).ToArray();
+
                             _logger.LogInformation($"job  [{jobEntry.JobName}]  start success");
                             method.Invoke(job, @params);
                             _logger.LogInformation($"job  [{jobEntry.JobName}]  invoke complete");
-                            jobEntry.NextUtcTime= new CronExpression(jobEntry.Cron).GetTimeAfter(DateTime.UtcNow);
-                        }
-                        else
-                        {
-                            _logger.LogInformation($"job  [{jobEntry.JobName}]  start false");
+                            jobEntry.NextUtcTime = new CronExpression(jobEntry.Cron).GetTimeAfter(DateTime.UtcNow);
                         }
                     }
                     catch (Exception e)
@@ -143,8 +138,8 @@ namespace ChronusJob
                     {
                         jobEntry.CompleteRun();
                     }
-                }
-            });
+                });
+            }
         }
     }
 }

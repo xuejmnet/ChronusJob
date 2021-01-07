@@ -11,7 +11,7 @@ namespace ChronusJob
 * @Date: Thursday, 07 January 2021 13:29:24
 * @Email: 326308290@qq.com
 */
-    public class ChronusJobBootstrapper : BackgroundService
+    internal class ChronusJobBootstrapper : BackgroundService
     {
         private readonly JobRunnerService _jobRunnerService;
 

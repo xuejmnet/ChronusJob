@@ -27,7 +27,7 @@ namespace ChronusJob.Jobs
         public List<JobEntry> GetNowRunJobs()
         {
             var now = DateTime.UtcNow;
-            return _jobs.Where(o => o.NextUtcTime.HasValue && o.NextUtcTime.Value < now).ToList();
+            return _jobs.Where(o => o.NextUtcTime.HasValue && o.NextUtcTime.Value <= now).ToList();
         }
     }
 }
