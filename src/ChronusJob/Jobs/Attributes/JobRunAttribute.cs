@@ -17,7 +17,25 @@ namespace ChronusJob.Jobs.Attributes
         /// <summary>
         /// 开始时间
         /// </summary>
-        public DateTime BeginUtcTime { get; set; }=DateTime.UtcNow;
+        public DateTime BeginUtcTime { get; set; }
+
+        public string Begin
+        {
+            get { return BeginUtcTime.ToString(); }
+            set
+            {
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    var localTime = Convert.ToDateTime(value);
+                    var utcOffset = TimeZoneInfo.Local.BaseUtcOffset.TotalMilliseconds;
+                    BeginUtcTime = localTime.AddMilliseconds(-utcOffset);
+                }
+                else
+                {
+                    BeginUtcTime=DateTime.UtcNow;
+                }
+            }
+        }
         /// <summary>
         /// 默认每分钟执行
         /// </summary>
