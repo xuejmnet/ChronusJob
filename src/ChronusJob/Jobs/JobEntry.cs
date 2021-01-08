@@ -45,6 +45,11 @@ namespace ChronusJob.Jobs
         /// 是否跳过如果正在运行
         /// </summary>
         public bool SkipIfRunning { get; set; }
+        /// <summary>
+        /// 是否从di容器中获取
+        /// </summary>
+        
+        public bool CreateFromServiceProvider { get; set; }
 
         /// <summary>
         /// 下次运行时间

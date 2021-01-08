@@ -3,7 +3,10 @@
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
         <Authors>xuejm</Authors>
-        <Description>简单的定时任务</Description>
+        <Description>optimize job thread wait</Description>
+        <PackageVersion>1.0.1</PackageVersion>
+        <PackageProjectUrl>https://github.com/xuejmnet/ChronusJob</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/xuejmnet/ChronusJob</RepositoryUrl>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>

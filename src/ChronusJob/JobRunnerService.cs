@@ -23,6 +23,7 @@ namespace ChronusJob
         private readonly IServiceProvider _serviceProvider;
         private readonly IJobManager _jobManager;
         private readonly ILogger<JobRunnerService> _logger;
+        private readonly IJobFactory _jobFactory;
         private readonly CancellationTokenSource _cts = new CancellationTokenSource();
         private const long DEFAULT_MILLIS = 1000L;
 
@@ -31,11 +32,12 @@ namespace ChronusJob
         /// </summary>
         private const long MAX_DELAY_MILLIS = 30000L;
 
-        public JobRunnerService(IServiceProvider serviceProvider, IJobManager jobManager, ILogger<JobRunnerService> logger)
+        public JobRunnerService(IServiceProvider serviceProvider, IJobManager jobManager, ILogger<JobRunnerService> logger, IJobFactory jobFactory)
         {
             _serviceProvider = serviceProvider;
             _jobManager = jobManager;
             _logger = logger;
+            _jobFactory = jobFactory;
             Init();
         }
 
@@ -129,32 +131,34 @@ namespace ChronusJob
         {
             if (jobEntry.StartRun())
             {
-                Task.Factory.StartNew(() =>
+                Task.Factory.StartNew(async () =>
                 {
                     try
                     {
                         using (var scope = _serviceProvider.CreateScope())
                         {
-                            var args = jobEntry.JobClass.GetConstructors()
-                                .First()
-                                .GetParameters()
-                                .Select(x =>
-                                {
-                                    if (x.ParameterType == typeof(IServiceProvider))
-                                        return scope.ServiceProvider;
-                                    else
-                                        return scope.ServiceProvider.GetService(x.ParameterType);
-                                })
-                                .ToArray();
-                            var job = Activator.CreateInstance(jobEntry.JobClass, args);
+                            var job = _jobFactory.CreateJobInstance(scope, jobEntry);
+                            if (job == null)
+                                _logger.LogWarning($"###  job  [{jobEntry.JobName}] cant created, create method :{(jobEntry.CreateFromServiceProvider ? "from service provider" : "activator")}");
                             var method = jobEntry.JobMethod;
                             var @params = method.GetParameters().Select(x => scope.ServiceProvider.GetService(x.ParameterType)).ToArray();
-
-                            _logger.LogDebug($"###  job  [{jobEntry.JobName}]  start success.");
-                            method.Invoke(job, @params);
-                            _logger.LogDebug($"###  job  [{jobEntry.JobName}]  invoke complete.");
+#if DEBUG
+                            _logger.LogInformation($"###  job  [{jobEntry.JobName}]  start success.");
+#endif
+                            if (method.IsAsyncMethod())
+                            {
+                                if (method.Invoke(job, @params) is Task task)
+                                    await task;
+                            }
+                            else
+                            {
+                                method.Invoke(job, @params);
+                            }
+#if DEBUG
+                            _logger.LogInformation($"###  job  [{jobEntry.JobName}]  invoke complete.");
+#endif
                             jobEntry.NextUtcTime = new CronExpression(jobEntry.Cron).GetTimeAfter(DateTime.UtcNow);
-                            if(!jobEntry.NextUtcTime.HasValue)
+                            if (!jobEntry.NextUtcTime.HasValue)
                                 _logger.LogWarning($"###  job [{jobEntry.JobName}] is stopped.");
                         }
                     }

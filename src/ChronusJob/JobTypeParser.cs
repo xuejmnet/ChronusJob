@@ -38,6 +38,7 @@ namespace ChronusJob
                         JobName = jobRun.Name ?? (type.Name + "." + method.Name),
                         NextUtcTime = new CronExpression(jobRun.Cron).GetTimeAfter(jobRun.BeginUtcTime),
                         SkipIfRunning = jobRun.SkipIfRunning,
+                        CreateFromServiceProvider = jobRun.CreateFromServiceProvider,
                         JobClass = type,
                         JobMethod = method
                     };

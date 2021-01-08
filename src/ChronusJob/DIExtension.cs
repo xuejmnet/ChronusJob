@@ -17,6 +17,7 @@ namespace ChronusJob
         {
             services.AddSingleton<IJobManager, InMemoryJobManager>()
                 .AddSingleton<JobRunnerService>()
+                .AddSingleton<IJobFactory,DefaultJobFactory>()
                 .AddHostedService<ChronusJobBootstrapper>();
             return services;
         }

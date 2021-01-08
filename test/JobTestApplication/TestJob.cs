@@ -1,5 +1,6 @@
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 using ChronusJob.Abstractions;
 using ChronusJob.Jobs.Attributes;
 
@@ -13,11 +14,11 @@ namespace JobTestApplication
 */
     public class TestJob:IJob
     {
-        [JobRun(Name = "printjob",Cron = "*/10 * * * * ?",Begin = "2021-01-07 15:46:30")]
+        [JobRun(Name = "printjob",Cron = "*/5 * * * * ?",Begin = "2021-01-07 15:46:30")]
         public void Print()
         {
             Console.WriteLine("Print"+DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"));
-            Thread.Sleep(new Random().Next(1,2000));
+            Thread.Sleep(2000);
         }
         // [JobRun(Name = "printjob1",Cron = "*/15 * * * * ?",Begin = "2021-01-07 15:46:30")]
         public void Print1()

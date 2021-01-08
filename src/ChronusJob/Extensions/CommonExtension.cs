@@ -1,4 +1,6 @@
 using System;
+using System.Reflection;
+using System.Threading.Tasks;
 using ChronusJob.Abstractions;
 
 namespace ChronusJob.Extensions
@@ -17,6 +19,10 @@ namespace ChronusJob.Extensions
             if (entityType == null)
                 throw new ArgumentNullException(nameof(entityType));
             return typeof(IJob).IsAssignableFrom(entityType);
+        }
+        public static bool IsAsyncMethod(this MethodInfo method)
+        {
+            return (typeof(Task).IsAssignableFrom(method.ReturnType));
         }
     }
 }
