@@ -51,7 +51,7 @@ namespace ChronusJob.Jobs.Attributes
         /// </summary>
         public bool CreateFromServiceProvider { get; set; } = false;
         /// <summary>
-        /// 是否马上执行在程序启动后
+        /// 是否马上执行在程序启动后 需要优先满足Begin条件
         /// </summary>
         public bool RunOnceOnStart { get; set; } = false;
     }

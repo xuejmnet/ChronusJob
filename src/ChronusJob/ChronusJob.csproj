@@ -3,8 +3,8 @@
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
         <Authors>xuejm</Authors>
-        <Description>support async method and add delay on start</Description>
-        <PackageVersion>1.0.2</PackageVersion>
+        <Description>config job is run on app start</Description>
+        <PackageVersion>1.0.4</PackageVersion>
         <PackageProjectUrl>https://github.com/xuejmnet/ChronusJob</PackageProjectUrl>
         <RepositoryUrl>https://github.com/xuejmnet/ChronusJob</RepositoryUrl>
         <Title>ChronusJob</Title>
