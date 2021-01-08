@@ -50,5 +50,9 @@ namespace ChronusJob.Jobs.Attributes
         /// 是否从di容器中获取
         /// </summary>
         public bool CreateFromServiceProvider { get; set; } = false;
+        /// <summary>
+        /// 是否马上执行在程序启动后
+        /// </summary>
+        public bool RunOnceOnStart { get; set; } = false;
     }
 }

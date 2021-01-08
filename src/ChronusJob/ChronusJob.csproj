@@ -3,10 +3,11 @@
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
         <Authors>xuejm</Authors>
-        <Description>optimize job thread wait</Description>
-        <PackageVersion>1.0.1</PackageVersion>
+        <Description>support async method and add delay on start</Description>
+        <PackageVersion>1.0.2</PackageVersion>
         <PackageProjectUrl>https://github.com/xuejmnet/ChronusJob</PackageProjectUrl>
         <RepositoryUrl>https://github.com/xuejmnet/ChronusJob</RepositoryUrl>
+        <Title>ChronusJob</Title>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>

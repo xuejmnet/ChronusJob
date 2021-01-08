@@ -36,7 +36,7 @@ namespace ChronusJob
                         BeginUtcTime = jobRun.BeginUtcTime,
                         Cron = jobRun.Cron,
                         JobName = jobRun.Name ?? (type.Name + "." + method.Name),
-                        NextUtcTime = new CronExpression(jobRun.Cron).GetTimeAfter(jobRun.BeginUtcTime),
+                        NextUtcTime = GetNextRunUtcTime(jobRun),
                         SkipIfRunning = jobRun.SkipIfRunning,
                         CreateFromServiceProvider = jobRun.CreateFromServiceProvider,
                         JobClass = type,
@@ -47,6 +47,24 @@ namespace ChronusJob
             }
 
             return list;
+        }
+        /// <summary>
+        /// 判断时间是否满足启动时间如果满足就判断是需要在程序启动时就执行一次,如果需要就返回当前时间,如果不需要就按启动时间生成下次执行时间
+        /// </summary>
+        /// <param name="jobRun"></param>
+        /// <returns></returns>
+        private static DateTime? GetNextRunUtcTime(JobRunAttribute jobRun)
+        {
+            var utcNow = DateTime.UtcNow;
+            if (utcNow >= jobRun.BeginUtcTime)
+            {
+                if (jobRun.RunOnceOnStart)
+                {
+                   return utcNow;
+                }
+            }
+            return new CronExpression(jobRun.Cron).GetTimeAfter(jobRun.BeginUtcTime);
+
         }
     }
 }
