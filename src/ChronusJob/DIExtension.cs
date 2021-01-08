@@ -13,11 +13,13 @@ namespace ChronusJob
 */
     public static class DIExtension
     {
-        public static IServiceCollection AddChronusJob(this IServiceCollection services)
+        public static IServiceCollection AddChronusJob(this IServiceCollection services, Action<JobGlobalOptions> config=null)
         {
-            services.AddSingleton<IJobManager, InMemoryJobManager>()
+            var option = new JobGlobalOptions();
+            config?.Invoke(option);
+            services.AddSingleton(sp=>option).AddSingleton<IJobManager, InMemoryJobManager>()
                 .AddSingleton<JobRunnerService>()
-                .AddSingleton<IJobFactory,DefaultJobFactory>()
+                .AddSingleton<IJobFactory, DefaultJobFactory>()
                 .AddHostedService<ChronusJobBootstrapper>();
             return services;
         }

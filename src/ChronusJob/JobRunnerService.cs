@@ -21,6 +21,7 @@ namespace ChronusJob
     public class JobRunnerService
     {
         private readonly IServiceProvider _serviceProvider;
+        private readonly JobGlobalOptions _jobGlobalOptions;
         private readonly IJobManager _jobManager;
         private readonly ILogger<JobRunnerService> _logger;
         private readonly IJobFactory _jobFactory;
@@ -32,9 +33,10 @@ namespace ChronusJob
         /// </summary>
         private const long MAX_DELAY_MILLIS = 30000L;
 
-        public JobRunnerService(IServiceProvider serviceProvider, IJobManager jobManager, ILogger<JobRunnerService> logger, IJobFactory jobFactory)
+        public JobRunnerService(IServiceProvider serviceProvider,JobGlobalOptions jobGlobalOptions, IJobManager jobManager, ILogger<JobRunnerService> logger, IJobFactory jobFactory)
         {
             _serviceProvider = serviceProvider;
+            _jobGlobalOptions = jobGlobalOptions;
             _jobManager = jobManager;
             _logger = logger;
             _jobFactory = jobFactory;
@@ -61,6 +63,8 @@ namespace ChronusJob
 
         public async Task StartAsync()
         {
+            if (_jobGlobalOptions.DelaySecondsOnStart > 0)
+                await Task.Delay(TimeSpan.FromSeconds(_jobGlobalOptions.DelaySecondsOnStart),_cts.Token);
             while (!_cts.Token.IsCancellationRequested)
             {
                 var delayMs = 0L;
