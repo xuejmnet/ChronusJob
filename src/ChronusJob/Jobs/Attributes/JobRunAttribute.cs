@@ -15,26 +15,25 @@ namespace ChronusJob.Jobs.Attributes
         /// 任务名称
         /// </summary>
         public string Name { get; set; }
+
         /// <summary>
         /// 开始时间
         /// </summary>
-        public DateTime BeginUtcTime { get; set; }
+        public DateTime BeginUtcTime => GetBeginUtcTime();
 
-        public string Begin
+        public string Begin { get; set; }
+
+        private DateTime GetBeginUtcTime()
         {
-            get { return BeginUtcTime.ToString(); }
-            set
+            if (!string.IsNullOrWhiteSpace(Begin))
             {
-                if (!string.IsNullOrWhiteSpace(value))
-                {
-                    var localTime = Convert.ToDateTime(value);
-                    var utcOffset = TimeZoneInfo.Local.BaseUtcOffset.TotalMilliseconds;
-                    BeginUtcTime = localTime.AddMilliseconds(-utcOffset);
-                }
-                else
-                {
-                    BeginUtcTime=DateTime.UtcNow;
-                }
+                var localTime = Convert.ToDateTime(Begin);
+                var utcOffset = TimeZoneInfo.Local.BaseUtcOffset.TotalMilliseconds;
+                return localTime.AddMilliseconds(-utcOffset);
+            }
+            else
+            {
+                return DateTime.UtcNow;
             }
         }
         /// <summary>

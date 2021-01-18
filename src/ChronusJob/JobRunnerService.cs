@@ -96,7 +96,6 @@ namespace ChronusJob
         private long LoopJobAndGetWaitMillis()
         {
             var beginTime = UtcTime.CurrentTimeMillis();
-            ;
             var costTime = 0L;
             var runJobs = _jobManager.GetNowRunJobs();
             if (!runJobs.Any())

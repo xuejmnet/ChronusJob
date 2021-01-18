@@ -14,7 +14,7 @@ namespace JobTestApplication
 */
     public class TestJob:IJob
     {
-        [JobRun(Name = "printjob",Cron = "0 0 12 * * ?",RunOnceOnStart = true)]
+        [JobRun(Name = "printjob",Cron = "0 0 1 * * ?",RunOnceOnStart = false)]
         public void Print()
         {
             Console.WriteLine("Print"+DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"));
