@@ -20,7 +20,9 @@ namespace ChronusJob.Jobs.Attributes
         /// 开始时间
         /// </summary>
         public DateTime BeginUtcTime => GetBeginUtcTime();
-
+        /// <summary>
+        /// 任务开始时间优先级最高,格式:yyyy/MM/dd HH:mm:ss、yyyy-MM-dd HH:mm:ss
+        /// </summary>
         public string Begin { get; set; }
 
         private DateTime GetBeginUtcTime()
