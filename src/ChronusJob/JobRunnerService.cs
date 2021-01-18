@@ -92,7 +92,7 @@ namespace ChronusJob
         /// <summary>
         /// 
         /// </summary>
-        /// <returns>next utc time that job will restart</returns>
+        /// <returns>next utc time that job when restart</returns>
         private long LoopJobAndGetWaitMillis()
         {
             var beginTime = UtcTime.CurrentTimeMillis();
