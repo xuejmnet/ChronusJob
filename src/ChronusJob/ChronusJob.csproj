@@ -3,8 +3,8 @@
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
         <Authors>xuejm</Authors>
-        <Description>fix bug begin  utc time</Description>
-        <PackageVersion>1.0.5</PackageVersion>
+        <Description>fix bug if job error</Description>
+        <PackageVersion>1.0.6</PackageVersion>
         <PackageProjectUrl>https://github.com/xuejmnet/ChronusJob</PackageProjectUrl>
         <RepositoryUrl>https://github.com/xuejmnet/ChronusJob</RepositoryUrl>
         <Title>ChronusJob</Title>

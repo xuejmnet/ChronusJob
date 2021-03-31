@@ -160,9 +160,7 @@ namespace ChronusJob
 #if DEBUG
                             _logger.LogInformation($"###  job  [{jobEntry.JobName}]  invoke complete.");
 #endif
-                            jobEntry.NextUtcTime = new CronExpression(jobEntry.Cron).GetTimeAfter(DateTime.UtcNow);
-                            if (!jobEntry.NextUtcTime.HasValue)
-                                _logger.LogWarning($"###  job [{jobEntry.JobName}] is stopped.");
+                           
                         }
                     }
                     catch (Exception e)
@@ -171,6 +169,10 @@ namespace ChronusJob
                     }
                     finally
                     {
+                        jobEntry.NextUtcTime = new CronExpression(jobEntry.Cron).GetTimeAfter(DateTime.UtcNow);
+                        if (!jobEntry.NextUtcTime.HasValue)
+                            _logger.LogWarning($"###  job [{jobEntry.JobName}] is stopped.");
+
                         jobEntry.CompleteRun();
                     }
                 });
