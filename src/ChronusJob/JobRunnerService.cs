@@ -63,6 +63,8 @@ namespace ChronusJob
 
         public async Task StartAsync()
         {
+            if (!_jobGlobalOptions.Enable)
+                return;
             if (_jobGlobalOptions.DelaySecondsOnStart > 0)
                 await Task.Delay(TimeSpan.FromSeconds(_jobGlobalOptions.DelaySecondsOnStart),_cts.Token);
             while (!_cts.Token.IsCancellationRequested)
@@ -85,6 +87,8 @@ namespace ChronusJob
 
         public Task StopAsync()
         {
+            if (!_jobGlobalOptions.Enable)
+                return Task.CompletedTask;
             _cts.Cancel();
             return Task.CompletedTask;
         }

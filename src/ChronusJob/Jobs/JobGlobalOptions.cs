@@ -14,5 +14,9 @@ namespace ChronusJob.Jobs
         /// 延迟启动时间
         /// </summary>
         public int DelaySecondsOnStart { get; set; } = 0;
+        /// <summary>
+        /// 是否启用
+        /// </summary>
+        public bool Enable { get; set; } = true;
     }
 }
